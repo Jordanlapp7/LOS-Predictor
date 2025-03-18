@@ -1,0 +1,5 @@
+# created by virtualenv automatically
+.venv/
+.venv/Lib/site-packages/pydata_google_auth/auth.py
+service_account_key.json
+.env
