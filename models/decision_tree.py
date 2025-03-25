@@ -29,7 +29,7 @@ class DecisionTree:
         n_labels = len(np.unique(y))
 
         # check the stopping criteria
-        if (depth>=self.max_depth or n_labels==1 or n_samples<self.min_samples_split):
+        if (depth>=self.max_depth or n_samples<self.min_samples_split):
             leaf_value = self._calculate_leaf_value(y)
             return Node(value=leaf_value)
 
@@ -66,8 +66,8 @@ class DecisionTree:
 
 
     def _information_gain(self, y, X_column, threshold):
-        # parent entropy
-        parent_entropy = self._entropy(y)
+        # parent variance
+        parent_variance = self._variance(y)
 
         # create children
         left_idxs, right_idxs = self._split(X_column, threshold)
@@ -75,14 +75,14 @@ class DecisionTree:
         if len(left_idxs) == 0 or len(right_idxs) == 0:
             return 0
         
-        # calculate the weighted avg. entropy of children
+        # calculate the weighted avg. variance of children
         n = len(y)
         n_l, n_r = len(left_idxs), len(right_idxs)
-        e_l, e_r = self._entropy(y[left_idxs]), self._entropy(y[right_idxs])
-        child_entropy = (n_l/n) * e_l + (n_r/n) * e_r
+        var_l, var_r = self._variance(y[left_idxs]), self._variance(y[right_idxs])
+        child_variance = (n_l/n) * var_l + (n_r/n) * var_r
 
         # calculate the IG
-        information_gain = parent_entropy - child_entropy
+        information_gain = parent_variance - child_variance
         return information_gain
 
     def _split(self, X_column, split_thresh):
@@ -90,10 +90,8 @@ class DecisionTree:
         right_idxs = np.argwhere(X_column > split_thresh).flatten()
         return left_idxs, right_idxs
 
-    def _entropy(self, y):
-        hist = np.bincount(y)
-        ps = hist / len(y)
-        return -np.sum([p * np.log(p) for p in ps if p>0])
+    def _variance(self, y):
+      return np.var(y)
 
 
     def _calculate_leaf_value(self, y):
@@ -109,3 +107,24 @@ class DecisionTree:
         if x[node.feature] <= node.threshold:
             return self._traverse_tree(x, node.left)
         return self._traverse_tree(x, node.right)
+    
+if __name__ == "__main__":
+    # Test decision tree using small dataset
+    import pandas as pd
+    # Features (X)
+    X = pd.DataFrame({
+      'feature1': [1, 2, 3, 4, 5, 6],
+      'feature2': [5, 4, 3, 2, 1, 0]
+    })
+
+    # Target (y) - Continuous
+    y = pd.Series([1.5, 1.7, 3.0, 3.2, 5.0, 5.2])
+
+    # Train on sample training data
+    tree = DecisionTree(max_depth=2)
+    tree.fit(X.values, y.values)
+
+    # Predict on sample training data
+    preds = tree.predict(X.values)
+    print("Predictions:", preds)
+    print("True values:", y.values)
