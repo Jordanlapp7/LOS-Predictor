@@ -14,7 +14,7 @@ class Node:
 
 
 class DecisionTree:
-    def __init__(self, min_samples_split=2, max_depth=100, n_features=None):
+    def __init__(self, min_samples_split=2, max_depth=10, n_features=None):
         self.min_samples_split=min_samples_split
         self.max_depth=max_depth
         self.n_features=n_features
@@ -36,9 +36,12 @@ class DecisionTree:
 
         # find the best split
         best_feature, best_thresh = self._best_split(X, y, feat_idxs)
-
+        
         # create child nodes
         left_idxs, right_idxs = self._split(X[:, best_feature], best_thresh)
+        if len(left_idxs) == 0 or len(right_idxs) == 0:
+            leaf_value = np.mean(y)
+            return Node(value=leaf_value)
         left = self._grow_tree(X[left_idxs, :], y[left_idxs], depth+1)
         right = self._grow_tree(X[right_idxs, :], y[right_idxs], depth+1)
         return Node(best_feature, best_thresh, left, right)
@@ -103,6 +106,7 @@ class DecisionTree:
 if __name__ == "__main__":
     # Test decision tree using small dataset
     import pandas as pd
+    from sklearn.metrics import mean_squared_error
     # Features (X)
     X = pd.DataFrame({
       'feature1': [1, 2, 3, 4, 5, 6],
@@ -118,5 +122,8 @@ if __name__ == "__main__":
 
     # Predict on sample training data
     preds = tree.predict(X.values)
+    mse = mean_squared_error(y.values, preds)
     print("Predictions:", preds)
     print("True values:", y.values)
+    print("Mean squared error:", mse)
+    print("Root mean squared error:", np.sqrt(mse))
