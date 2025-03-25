@@ -26,11 +26,10 @@ class DecisionTree:
 
     def _grow_tree(self, X, y, depth=0):
         n_samples, n_feats = X.shape
-        n_labels = len(np.unique(y))
 
         # check the stopping criteria
         if (depth>=self.max_depth or n_samples<self.min_samples_split):
-            leaf_value = self._calculate_leaf_value(y)
+            leaf_value = np.mean(y)
             return Node(value=leaf_value)
 
         feat_idxs = np.random.choice(n_feats, self.n_features, replace=False)
@@ -67,7 +66,7 @@ class DecisionTree:
 
     def _information_gain(self, y, X_column, threshold):
         # parent variance
-        parent_variance = self._variance(y)
+        parent_variance = np.var(y)
 
         # create children
         left_idxs, right_idxs = self._split(X_column, threshold)
@@ -78,7 +77,7 @@ class DecisionTree:
         # calculate the weighted avg. variance of children
         n = len(y)
         n_l, n_r = len(left_idxs), len(right_idxs)
-        var_l, var_r = self._variance(y[left_idxs]), self._variance(y[right_idxs])
+        var_l, var_r = np.var(y[left_idxs]), np.var(y[right_idxs])
         child_variance = (n_l/n) * var_l + (n_r/n) * var_r
 
         # calculate the IG
@@ -89,13 +88,6 @@ class DecisionTree:
         left_idxs = np.argwhere(X_column <= split_thresh).flatten()
         right_idxs = np.argwhere(X_column > split_thresh).flatten()
         return left_idxs, right_idxs
-
-    def _variance(self, y):
-      return np.var(y)
-
-
-    def _calculate_leaf_value(self, y):
-      return np.mean(y)
 
     def predict(self, X):
         return np.array([self._traverse_tree(x, self.root) for x in X])
