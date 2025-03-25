@@ -31,6 +31,7 @@ JOIN `physionet-data.mimiciv_3_1_hosp.admissions` AS adm
 JOIN `physionet-data.mimiciv_3_1_hosp.diagnoses_icd` AS diag
     ON adm.hadm_id = diag.hadm_id
 WHERE adm.dischtime IS NOT NULL
+AND diag.seq_num = 1
 """
 
 def load_data():
@@ -40,4 +41,5 @@ def load_data():
 
 if __name__ == "__main__":
     df = load_data()
-    print(df.head())
+    df.to_csv('output.csv', index=False)
+    # print(df.head())
