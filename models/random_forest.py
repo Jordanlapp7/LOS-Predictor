@@ -1,5 +1,6 @@
 from decision_tree import DecisionTree
 import numpy as np
+from tqdm import tqdm
 
 class RandomForest:
     def __init__(self, n_trees=10, max_depth=10, min_samples_split=2, n_feature=None):
@@ -11,7 +12,7 @@ class RandomForest:
 
     def fit(self, X, y):
         self.trees = []
-        for _ in range(self.n_trees):
+        for _ in tqdm(range(self.n_trees), desc="Training Random Forest", unit="tree"):
             tree = DecisionTree(max_depth=self.max_depth,
                             min_samples_split=self.min_samples_split,
                             n_features=self.n_features)
