@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from random_forest import RandomForest
 
-def train_model(X, y):
+def train_random_forest(X, y):
     """Trains Random Forest model."""
     # Train/test split
     X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.2, random_state=42)
@@ -22,9 +22,10 @@ def train_model(X, y):
     mse = mean_squared_error(y_test, preds)
     rmse = mse ** 0.5
 
-    print("MAE:", mae)
-    print("MSE:", mse)
-    print("RMSE:", rmse)
+    print("Random Forest Results:")
+    print(f"MAE: {mae:.3f}")
+    print(f"MSE: {mse:.3f}")
+    print(f"RMSE: {rmse:.3f}")
 
 if __name__ == "__main__":
     # from data_extraction import load_data
@@ -32,4 +33,4 @@ if __name__ == "__main__":
     
     X = pd.read_csv('clean_output.csv')
     y = pd.read_csv('target.csv')
-    train_model(X, y)
+    train_random_forest(X, y)

@@ -4,3 +4,4 @@ service_account_key.json
 output.csv
 clean_output.csv
 target.csv
+__pycache__/
