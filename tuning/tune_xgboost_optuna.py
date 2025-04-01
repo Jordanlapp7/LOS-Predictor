@@ -53,5 +53,5 @@ def run_optuna_tuning(X, y, n_trials=50):
 if __name__ == "__main__":
     from data.load_pipeline import get_clean_data
     
-    X, y = get_clean_data()
+    X, y = get_clean_data(True)
     run_optuna_tuning(X, y)

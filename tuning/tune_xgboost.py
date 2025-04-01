@@ -48,5 +48,5 @@ def run_grid_search(X, y):
 if __name__ == "__main__":
     from data.load_pipeline import get_clean_data
     
-    X, y = get_clean_data()
+    X, y = get_clean_data(True)
     run_grid_search(X, y)
