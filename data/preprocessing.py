@@ -86,6 +86,6 @@ def preprocess_data(df):
 if __name__ == "__main__":
     from data_extraction import load_data
     df = load_data()
-    df_cleaned, y = preprocess_data(df)
-    df_cleaned.to_csv('clean_output.csv', index=False)
+    X, y = preprocess_data(df)
+    X.to_csv('clean_output.csv', index=False)
     y.to_csv('target.csv', index=False)

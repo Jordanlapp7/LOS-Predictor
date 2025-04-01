@@ -1,4 +1,4 @@
-from decision_tree import DecisionTree
+from models.decision_tree import DecisionTree
 import numpy as np
 from tqdm import tqdm
 

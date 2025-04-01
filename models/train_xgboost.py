@@ -17,11 +17,13 @@ def train_xgboost(X, y):
         'eval_metric': 'rmse',
         'max_depth': 6,
         'eta': 0.1,
+        'subsample': 0.8,
+        'colsample_bytree': 0.8,
         'seed': 42
     }
 
     # Train the model
-    model = xgb.train(params, dtrain, num_boost_round=1000, verbose_eval=1)
+    model = xgb.train(params, dtrain, num_boost_round=200, verbose_eval=1)
 
     # Predict
     preds = model.predict(dtest)
@@ -39,10 +41,7 @@ def train_xgboost(X, y):
     return model
 
 if __name__ == "__main__":
-    # from data_extraction import load_data
-    # from preprocessing import preprocess_data
-    import pandas as pd
+    from data.load_pipeline import get_clean_data
     
-    X = pd.read_csv('clean_output.csv')
-    y = pd.read_csv('target.csv')
+    X, y = get_clean_data()
     train_xgboost(X, y)

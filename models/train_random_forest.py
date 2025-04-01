@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from random_forest import RandomForest
+from models.random_forest import RandomForest
 
 def train_random_forest(X, y):
     """Trains Random Forest model."""
@@ -28,9 +28,7 @@ def train_random_forest(X, y):
     print(f"RMSE: {rmse:.3f}")
 
 if __name__ == "__main__":
-    # from data_extraction import load_data
-    # from preprocessing import preprocess_data
+    from data.load_pipeline import get_clean_data
     
-    X = pd.read_csv('clean_output.csv')
-    y = pd.read_csv('target.csv')
+    X, y = get_clean_data()
     train_random_forest(X, y)
