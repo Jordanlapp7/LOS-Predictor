@@ -14,10 +14,11 @@ class Node:
 
 
 class DecisionTree:
-    def __init__(self, min_samples_split=2, max_depth=10, n_features=None):
+    def __init__(self, min_samples_split=2, max_depth=10, classify=False, n_features=None):
         self.min_samples_split=min_samples_split
         self.max_depth=max_depth
         self.n_features=n_features
+        self.classify = classify
         self.root=None
 
     def fit(self, X, y):
@@ -26,10 +27,11 @@ class DecisionTree:
 
     def _grow_tree(self, X, y, depth=0):
         n_samples, n_feats = X.shape
+        n_labels = len(np.unique(y))
 
         # check the stopping criteria
-        if (depth>=self.max_depth or n_samples<self.min_samples_split):
-            leaf_value = np.mean(y)
+        if (depth>=self.max_depth or n_labels == 1 or n_samples<self.min_samples_split):
+            leaf_value = self._most_common_label(y) if self.classify else np.mean(y)
             return Node(value=leaf_value)
 
         feat_idxs = np.random.choice(n_feats, self.n_features, replace=False)
@@ -40,7 +42,7 @@ class DecisionTree:
         # create child nodes
         left_idxs, right_idxs = self._split(X[:, best_feature], best_thresh)
         if len(left_idxs) == 0 or len(right_idxs) == 0:
-            leaf_value = np.mean(y)
+            leaf_value = self._most_common_label(y) if self.classify else np.mean(y)
             return Node(value=leaf_value)
         left = self._grow_tree(X[left_idxs, :], y[left_idxs], depth+1)
         right = self._grow_tree(X[right_idxs, :], y[right_idxs], depth+1)
@@ -68,9 +70,6 @@ class DecisionTree:
 
 
     def _information_gain(self, y, X_column, threshold):
-        # parent variance
-        parent_variance = np.var(y)
-
         # create children
         left_idxs, right_idxs = self._split(X_column, threshold)
 
@@ -80,17 +79,36 @@ class DecisionTree:
         # calculate the weighted avg. variance of children
         n = len(y)
         n_l, n_r = len(left_idxs), len(right_idxs)
-        var_l, var_r = np.var(y[left_idxs]), np.var(y[right_idxs])
-        child_variance = (n_l/n) * var_l + (n_r/n) * var_r
+        if self.classify:
+            parent_entropy = self._entropy(y)
+            e_l, e_r = self._entropy(y[left_idxs]), self._entropy(y[right_idxs])
+            child_entropy = (n_l/n) * e_l + (n_r/n) * e_r
+            information_gain = parent_entropy - child_entropy
+        else:
+            parent_variance = np.var(y)
+            var_l, var_r = np.var(y[left_idxs]), np.var(y[right_idxs])
+            child_variance = (n_l/n) * var_l + (n_r/n) * var_r
+            information_gain = parent_variance - child_variance
 
-        # calculate the IG
-        information_gain = parent_variance - child_variance
         return information_gain
 
     def _split(self, X_column, split_thresh):
         left_idxs = np.argwhere(X_column <= split_thresh).flatten()
         right_idxs = np.argwhere(X_column > split_thresh).flatten()
         return left_idxs, right_idxs
+    
+    def _entropy(self, y):
+        if y.dtype.kind not in 'iu':  # Check if y is not integer
+            y = np.unique(y, return_inverse=True)[1]  # Get encoded array only
+
+        hist = np.bincount(y)
+        ps = hist / len(y)
+        return -np.sum([p * np.log(p) for p in ps if p > 0])
+    
+    def _most_common_label(self, y):
+        counter = Counter(y)
+        value = counter.most_common(1)[0][0]
+        return value
 
     def predict(self, X):
         return np.array([self._traverse_tree(x, self.root) for x in X])
@@ -106,24 +124,39 @@ class DecisionTree:
 if __name__ == "__main__":
     # Test decision tree using small dataset
     import pandas as pd
-    from sklearn.metrics import mean_squared_error
+    from sklearn.metrics import mean_squared_error, accuracy_score
+
+    # Toggle between regression and classification mode
+    classify = False
+
     # Features (X)
     X = pd.DataFrame({
-      'feature1': [1, 2, 3, 4, 5, 6],
-      'feature2': [5, 4, 3, 2, 1, 0]
+        'feature1': [1, 2, 3, 4, 5, 6],
+        'feature2': [5, 4, 3, 2, 1, 0]
     })
 
-    # Target (y) - Continuous
-    y = pd.Series([1.5, 1.7, 3.0, 3.2, 5.0, 5.2])
+    if classify:
+        # Target (y) - Categorical (binned LOS example)
+        y = pd.Series(["short", "short", "medium", "medium", "long", "long"])
+    else:
+        # Target (y) - Continuous
+        y = pd.Series([1.5, 1.7, 3.0, 3.2, 5.0, 5.2])
 
     # Train on sample training data
-    tree = DecisionTree(max_depth=2)
+    tree = DecisionTree(max_depth=2, classify=classify)
     tree.fit(X.values, y.values)
 
-    # Predict on sample training data
+    # Predict
     preds = tree.predict(X.values)
-    mse = mean_squared_error(y.values, preds)
+
+    # Evaluate
     print("Predictions:", preds)
     print("True values:", y.values)
-    print("Mean squared error:", mse)
-    print("Root mean squared error:", np.sqrt(mse))
+
+    if classify:
+        acc = accuracy_score(y.values, preds)
+        print("Accuracy:", acc)
+    else:
+        mse = mean_squared_error(y.values, preds)
+        print("Mean squared error:", mse)
+        print("Root mean squared error:", np.sqrt(mse))

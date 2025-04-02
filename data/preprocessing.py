@@ -54,7 +54,10 @@ def one_hot_encode_categoricals(X, categorical_cols):
 
     return X_encoded
 
-def preprocess_data(df):
+def bin_los(y):
+    return pd.cut(y, bins=[-1, 3, 7, float("inf")], labels=["short", "medium", "long"])
+
+def preprocess_data(df, classify=False):
     """Extracts target, handles missing values, encodes categorical variables, and scales numerical features."""
 
 
@@ -80,6 +83,9 @@ def preprocess_data(df):
 
     bool_cols = X.select_dtypes(include='bool').columns
     X[bool_cols] = X[bool_cols].astype(int)
+
+    if classify:
+        y = bin_los(y)
 
     return X, y
 
