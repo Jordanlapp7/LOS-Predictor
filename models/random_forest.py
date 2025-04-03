@@ -48,7 +48,7 @@ if __name__ == "__main__":
     import pandas as pd
     from sklearn.metrics import mean_squared_error, accuracy_score
 
-    classify = False
+    classify = True
 
     # Features
     X = pd.DataFrame({
