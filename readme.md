@@ -2,6 +2,7 @@
 The goal of this project is to estimate the length of a patient's hospital stay given the patient's demographics and hospital discourse information. This is achieved through machine learning principles. Two tree-based ensemble algorithms, random forest and XGBoost, were chosen to compare their performances. The random forest algorithm was implemented manually and XGBoost was imported from the XGBoost library. These models were trained on the MIMIC-IV library, an anonymized database of over 500,000 hospital admissions. The hyperparameters were tuned using grid-search and Bayesian optimization methods to maximize accuracy. Both regression and classification models were implemented, with the latter binning the length-of-stay outcome into short (1-2 days), medium (3-5 days), and long (6+ days) stays.
 
 ## Project Structure
+![End-to-end diagram of overall project structure](/figures/LOS_end_to_end_diagram.png)
 ### Data:
 data_extraction.py connects to the BigQuery server and queries it via SQL to retrieve the MIMIC-IV database containing the necessary features. It returns the data in a pandas dataframe.
 
