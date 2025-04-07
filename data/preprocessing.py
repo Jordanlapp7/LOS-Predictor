@@ -57,7 +57,7 @@ def one_hot_encode_categoricals(X, categorical_cols):
 def bin_los(y):
     return pd.cut(y, bins=[-1, 3, 7, float("inf")], labels=["short", "medium", "long"])
 
-def preprocess_data(df, classify=False):
+def preprocess_data(df, classify=False, save=False, output_X_path='clean_output.csv', output_y_path='target.csv'):
     """Extracts target, handles missing values, encodes categorical variables, and scales numerical features."""
 
 
@@ -86,6 +86,10 @@ def preprocess_data(df, classify=False):
 
     if classify:
         y = bin_los(y)
+
+    if save:
+        X.to_csv(output_X_path, index=False)
+        y.to_csv(output_y_path, index=False)
 
     return X, y
 
