@@ -1,13 +1,13 @@
-Length-of-Stay Prediction
+# Length-of-Stay Prediction  
 The goal of this project is to estimate the length of a patient's hospital stay given the patient's demographics and hospital discourse information. This is achieved through machine learning principles. Two tree-based ensemble algorithms, random forest and XGBoost, were chosen to compare their performances. The random forest algorithm was implemented manually and XGBoost was imported from the XGBoost library. These models were trained on the MIMIC-IV library, an anonymized database of over 500,000 hospital admissions. The hyperparameters were tuned using grid-search and Bayesian optimization methods to maximize accuracy. Both regression and classification models were implemented, with the latter binning the length-of-stay outcome into short (1-2 days), medium (3-5 days), and long (6+ days) stays.
 
-Project Structure
-Data:
+## Project Structure
+### Data:
 data_extraction.py connects to the BigQuery server and queries it via SQL to retrieve the MIMIC-IV database containing the necessary features. It returns the data in a pandas dataframe.
 
 preprocessing.py alters the data to be correctly formatted for the machine learning models. First, it separates the data into the input features and the isolated length-of-stay outcome. The ICD codes are abbreviated to only include the chapter and category to avoid scarcity. This primary diagnosis is target encoded rather than one-hot encoded to reduce dimensionality. All other categorical variables are one-hot encoded. If the classify flag is set, the outcome measure is binned as described above. There is an option to cache the outcomes in csv files to avoid repeated BigQuery querying.
 
-Models:
+### Models:
 decision_tree.py contains the manual implementation of the basic decision tree used later in the random forest algorithm. This file consists of nodes representing splits based on feature characteristics. The node class contains the feature type, threshold for the decision, left and right nodes, and a value for leaf nodes to represent the final prediction (otherwise defaulting to None for splitting nodes). It also includes a method to determine if it is a leaf node by checking if value is None. 
 
 The decision tree class contains attributes max_depth and min_sample_split to indicate when the recursion should stop. It also has n_features to clarify how many features are in this specific decision tree and has access to the root node. There is one method to fit the decision tree and one method to predict a value. 
@@ -24,15 +24,15 @@ The predict method iterates through each tree and stores the predicted values in
 
 The train_random_forest.py and train_xgboost.py files train the algorithms on the preprocessed data. train_random_forest.py imports the random forest and decision tree classes described above, whereas xgboost imports the algorithm from the xgboost library. Both training functions take the features dataframe, outcome series, and classification flag as inputs and print the evaluation metrics of the trained algorithm.
 
-Tests:
-There are test files for the corresponding files within this directory. These contain unit tests for the functions and classes and can be run with the command "python -B -m unittest discover".
+### Tests:
+There are test files for the corresponding files within this directory. These contain unit tests for the functions and classes and can be run with the command `python -B -m unittest discover`.
 
-Tuning:
+### Tuning:
 tune_xgboost.py provides a grid-search to determine the best hyperparameters. There are four hyperparameters with two options each. This does not search the entire decision space but provides a rudimentary ability to optimize the model.
 
 tune_xgboost_optuna.py implements Bayesion optimization more throroughly find the best hyperparameters. This involves strategically building a probability model of the object function to evaluate the true objective function. This specific instance runs 50 studies but can be increased to further derive the optimal hyperparameters.
 
-Alternative Options and Other Considerations
+## Alternative Options and Other Considerations
 Several traditional regression models were considered but ultimately not selected due to limitations in scalability, interpretability, or suitability for the dataset:
 
 Linear, Ridge, Lasso, and Stochastic Gradient Descent (SGD) Regression
@@ -46,75 +46,81 @@ KNN regression predicts outcomes by averaging target values of the nearest neigh
 
 Tree-based methods were preferred for their ability to capture non-linear interactions and robustness to feature scaling.
 
-How to Run Locally
-1. Clone the Repository:
+## How to Run Locally
+### 1. Clone the Repository:
+```
 git clone https://github.com/yourusername/los-predictor.git
 cd los-predictor
-
-2. Create and Activate a Virtual Environment
+```
+### 2. Create and Activate a Virtual Environment
+```
 python -m venv .venv
 source .venv/bin/activate (MacOS and Linux)
 .venv\Scripts\activate (Windows)
-
-3. Install Dependencies
+```
+### 3. Install Dependencies
+```
 pip install -r requirements.txt
-
-4. Set Up Environmental Variables
+```
+### 4. Set Up Environmental Variables
+```
 GCLOUD_PROJECT=your-gcloud-project-id
+```
+Make sure your local environment is authenticated with Google Cloud SDK: `gcloud auth application-default login`
 
-Make sure your local environment is authenticated with Google Cloud SDK:
-gcloud auth application-default login
-
-5. Fetch and Preprocess Data
+### 5. Fetch and Preprocess Data
+```
 python data/load_pipeline.py
-
+```
 This will either fetch the data from BigQuery and preprocess it or use cached clean_output.csv and target.csv if from_cache=True.
 
-6. Train Models
-python models/train_random_forest.py (Custom implementation)
-python models/train_xgboost.py (Library-based implementation)
-
+### 6. Train Models
+```
+python models/train_random_forest.py # Custom implementation
+python models/train_xgboost.py # Library-based implementation
+```
 Train either model depending on your use case
 
-7. Tune Models (Optional)
-python tuning/tune_xgboost.py (Grid Search)
-python tuning/tune_xgboost_optuna.py (Bayesian Optimization)
+### 7. Tune Models (Optional)
+```
+python tuning/tune_xgboost.py # Grid Search
+python tuning/tune_xgboost_optuna.py # Bayesian Optimization
+```
 
-Input Data
-This project uses clinical data from the MIMIC-IV database hosted on Google BigQuery. Each row in the dataset represents a single hospital admission and includes patient demographics, administrative details, and diagnosis information.
+## Input Data
+The following features were extracted from the MIMIC-IV database to train the models:
 
-Key Columns:
-subject_id: Unique patient identifier
+- subject_id: Unique patient identifier
 
-hadm_id: Unique hospital admission identifier
+- hadm_id: Unique hospital admission identifier
 
-gender: Patient gender (M or F)
+- gender: Patient gender (M or F)
 
-age: Patient age at the time of admission
+- age: Patient age at the time of admission
 
-race: Reported race of the patient
+- race: Reported race of the patient
 
-admission_type: Admission category (e.g., Emergency, Elective)
+- admission_type: Admission category (e.g., Emergency, Elective)
 
-insurance: Type of insurance coverage
+- insurance: Type of insurance coverage
 
-admittime: Timestamp of hospital admission
+- admittime: Timestamp of hospital admission
 
-dischtime: Timestamp of discharge
+- dischtime: Timestamp of discharge
 
-primary_diagnosis: ICD-10 diagnosis code for the stay
+- primary_diagnosis: ICD-10 diagnosis code for the stay
 
-length_of_stay: Calculated as the number of days between admission and discharge
+- length_of_stay: Calculated as the number of days between admission and discharge
 
 Note: Access to MIMIC-IV requires credentialing through PhysioNet, which involves completing a CITI module and providing a reason for access.
 
-Known Issues
+## Known Issues
 The current implementation of the random forest runs very slowly. Its default setting creates 10 decision trees. Each decision tree may take up to 30 minutes to train on the ~500,000 records for a total training time of 5 hours.
 
-Future Improvements
+## Future Improvements
 The predictive power of the features used in this project is lacking, with a final classification accuracy of 67%. More features should be incorporated to allow for more accurate outcomes. Specifically, secondary diagnoses and comorbidities may provide enough context to greatly improve the model predictions.
 
-Data Source & Acknowledgements
+## Data Source & Acknowledgements
 This project uses data from the MIMIC-IV (Medical Information Mart for Intensive Care IV) database.
 
 Access to MIMIC-IV is provided through PhysioNet.
