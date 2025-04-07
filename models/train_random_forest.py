@@ -7,7 +7,7 @@ from sklearn.metrics import (
 )
 from models.random_forest import RandomForest
 
-def train_random_forest(X, y, classify=False):
+def train_random_forest(X, y, classify=True):
     """Trains Random Forest model (classification or regression)."""
     
     # Train/test split

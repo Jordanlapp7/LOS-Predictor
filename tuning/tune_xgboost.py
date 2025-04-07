@@ -1,9 +1,8 @@
 import xgboost as xgb
 import itertools
 import numpy as np
-from sklearn.model_selection import train_test_split
 
-def run_grid_search(X, y, classify=False):
+def run_grid_search(X, y, classify=True):
     if classify:
         # Convert string labels to integers
         classes, y = np.unique(y, return_inverse=True)

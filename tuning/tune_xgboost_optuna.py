@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score
 
-def objective(trial, X, y, classify=False):
+def objective(trial, X, y, classify=True):
     X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, random_state=42)
 
     dtrain = xgb.DMatrix(X_train, label=y_train)

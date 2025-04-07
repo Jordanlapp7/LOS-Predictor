@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, accuracy_score
 import numpy as np
 
-def train_xgboost(X, y, classify=False):
+def train_xgboost(X, y, classify=True):
     # Train/test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
